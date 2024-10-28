@@ -17,7 +17,7 @@ async function installNoirup() {
 }
 
 export async function installNargo(version: string) {
-  await installNoirup();
+  const noirupBinary = await installNoirup();
 
   const path = await import("path");
   const fs = await import("fs");
@@ -34,7 +34,7 @@ export async function installNargo(version: string) {
     fs.mkdirSync(path.join(nargoBinDir), { recursive: true });
     console.log(`Installing nargo@${version} in ${nargoBinDir}`);
     await runCommand(
-      `NARGO_HOME=${path.dirname(nargoBinDir)} noirup -v ${version}`,
+      `NARGO_HOME=${path.dirname(nargoBinDir)} ${noirupBinary} -v ${version}`,
     );
   }
   return nargoBinary;
@@ -61,7 +61,7 @@ async function installBbup() {
 }
 
 export async function installBb(bbVersion: string): Promise<string> {
-  await installBbup();
+  const bbupBinary = await installBbup();
 
   const fs = await import("fs");
   const path = await import("path");
@@ -77,7 +77,7 @@ export async function installBb(bbVersion: string): Promise<string> {
     const bbDir = path.dirname(bbBinary);
     fs.mkdirSync(bbDir, { recursive: true });
     console.log(`Installing bb@${bbVersion} in ${bbDir}`);
-    await runCommand(`BB_HOME=${bbDir} bbup -v ${bbVersion}`);
+    await runCommand(`BB_HOME=${bbDir} ${bbupBinary} -v ${bbVersion}`);
   }
   return bbBinary;
 }
