@@ -1,4 +1,4 @@
-import type { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
+import type { UltraPlonkBackend } from "@aztec/bb.js";
 import type { CompiledCircuit, Noir } from "@noir-lang/noir_js";
 import type { Backend } from "@noir-lang/types";
 import { HardhatPluginError } from "hardhat/plugins";
@@ -37,7 +37,7 @@ export class NoirExtension {
    * @param name name of the circuit
    * @param createBackend an optional function that creates a backend for the given circuit. By default, it creates a `BarretenbergBackend`.
    */
-  async getCircuit<T extends Backend = BarretenbergBackend>(
+  async getCircuit<T extends Backend = UltraPlonkBackend>(
     name: string,
     createBackend?: (circuit: CompiledCircuit) => T | Promise<T>,
   ): Promise<{
@@ -49,10 +49,8 @@ export class NoirExtension {
     const { Noir } = await import("@noir-lang/noir_js");
     const noir = new Noir(circuit);
     createBackend ||= async (circuit: CompiledCircuit) => {
-      const { BarretenbergBackend } = await import(
-        "@noir-lang/backend_barretenberg"
-      );
-      const ultraPlonk = new BarretenbergBackend(circuit);
+      const { UltraPlonkBackend } = await import("@aztec/bb.js");
+      const ultraPlonk = new UltraPlonkBackend(circuit.bytecode);
       return ultraPlonk as unknown as T;
     };
     const backend = await createBackend(circuit);
