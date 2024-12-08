@@ -50,7 +50,7 @@ extendConfig(
       };
       u = u || {};
       const version = u.version;
-      const bbVersion = bbVersionMap[version];
+      const bbVersion = u.bbVersion ?? bbVersionMap[version];
       if (!bbVersion) {
         throw new HardhatPluginError(
           PLUGIN_NAME,
