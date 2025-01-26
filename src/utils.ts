@@ -1,3 +1,5 @@
+import { HardhatPluginError } from "hardhat/plugins";
+
 export const PLUGIN_NAME = "hardhat-plugin-noir";
 
 export const makeRunCommand = (cwd?: string) => async (command: string) => {
@@ -19,6 +21,9 @@ export const makeRunCommand = (cwd?: string) => async (command: string) => {
   } catch (error) {
     console.error(`Error executing command: ${command}`);
     console.error((error as any).stderr || (error as any).message); // Log only error messages
-    throw error;
+    throw new HardhatPluginError(
+      PLUGIN_NAME,
+      `Error executing command: ${command}`,
+    );
   }
 };
