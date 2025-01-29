@@ -19,11 +19,11 @@ importers:
         specifier: 0.63.1
         version: 0.63.1
       '@noir-lang/noir_js':
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0
+        specifier: 1.0.0-beta.1
+        version: 1.0.0-beta.1
       '@noir-lang/types':
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0
+        specifier: 1.0.0-beta.1
+        version: 1.0.0-beta.1
       '@nomicfoundation/hardhat-ethers':
         specifier: ^3.0.8
         version: 3.0.8(ethers@6.13.4)(hardhat@2.22.14(ts-node@10.9.2(@types/node@22.7.9)(typescript@5.6.3))(typescript@5.6.3))
@@ -157,17 +157,17 @@ packages:
   '@noble/secp256k1@1.7.1':
     resolution: {integrity: sha512-hOUk6AyBFmqVrv7k5WAw/LpszxVbj9gGN4JRkIX52fdFAj1UA61KXmZDvqVEm+pOyec3+fIeZB02LYa/pWOArw==}
 
-  '@noir-lang/acvm_js@1.0.0-beta.0':
-    resolution: {integrity: sha512-92GBgWF9B73vXMxUZF3MKcvIgOM8YX05ZdRyvCx0Xq80jttTrr1A1xVDUsHU640Btm9oPzzdYQqggb+aJkW+pw==}
+  '@noir-lang/acvm_js@1.0.0-beta.1':
+    resolution: {integrity: sha512-4lWC543pScZ+NG8hqB0xOLfdgqCQJaclrdQ8GVIj7jwZ8mS982XV97IKfglqgE7Ovcik2j8QRHZq5FaVR/Bn9w==}
 
-  '@noir-lang/noir_js@1.0.0-beta.0':
-    resolution: {integrity: sha512-ZSn615HHO7bHlEW1/L3CwysElDqyjUnN6PMezkmOhx2qz1U0iUqvcTiqdXklH40MbISifGmly2VsKe0vVwtjXw==}
+  '@noir-lang/noir_js@1.0.0-beta.1':
+    resolution: {integrity: sha512-QiRHYKkuHDPWdEhuU3SCUAuOZm0KR766S+Pd0nKpRfAcX1p5MDEDS9ij8me3CTAIhVb/VHNx25zUE/i4zs1sDg==}
 
-  '@noir-lang/noirc_abi@1.0.0-beta.0':
-    resolution: {integrity: sha512-RvEVLtKnVeY1yTOVvBll/gHpAtWi6sqp1jZWqt7VK+dzG7l8i9S9deCrn1I321xamkgebWgscfkdhKKUBCKaHQ==}
+  '@noir-lang/noirc_abi@1.0.0-beta.1':
+    resolution: {integrity: sha512-Me2LrH57YZl47UvHnzPd02pw8H9snJLob6dv6clbFB7ac6Y8jZvH/YhNGOejgj1fudr/J/V6o+YZaf4oLpxtMg==}
 
-  '@noir-lang/types@1.0.0-beta.0':
-    resolution: {integrity: sha512-+LGd8GpZfGh/gir3LX/VjphHG9wWfF/YaZWOUcaxX/TJDU/Lk+THJQnaNhxNG0z2qn/LJVlCOT65L+BLZKBidw==}
+  '@noir-lang/types@1.0.0-beta.1':
+    resolution: {integrity: sha512-rcisXDdKNLA7mh0Ll9j3MGG5BP3W52K3Owr0+opJhs+4jHoAx1Gb5vGNG9s6nYb2i21VZMgOzKVvBd25ck0b9w==}
 
   '@nomicfoundation/edr-darwin-arm64@0.6.4':
     resolution: {integrity: sha512-QNQErISLgssV9+qia8sIjRANqtbW8snSDvjspixT/kSQ5ZSGxxctTg7x72wPSrcu8+EBEveIe5uqENIp5GH8HQ==}
@@ -1481,19 +1481,19 @@ snapshots:
 
   '@noble/secp256k1@1.7.1': {}
 
-  '@noir-lang/acvm_js@1.0.0-beta.0': {}
+  '@noir-lang/acvm_js@1.0.0-beta.1': {}
 
-  '@noir-lang/noir_js@1.0.0-beta.0':
+  '@noir-lang/noir_js@1.0.0-beta.1':
     dependencies:
-      '@noir-lang/acvm_js': 1.0.0-beta.0
-      '@noir-lang/noirc_abi': 1.0.0-beta.0
-      '@noir-lang/types': 1.0.0-beta.0
+      '@noir-lang/acvm_js': 1.0.0-beta.1
+      '@noir-lang/noirc_abi': 1.0.0-beta.1
+      '@noir-lang/types': 1.0.0-beta.1
 
-  '@noir-lang/noirc_abi@1.0.0-beta.0':
+  '@noir-lang/noirc_abi@1.0.0-beta.1':
     dependencies:
-      '@noir-lang/types': 1.0.0-beta.0
+      '@noir-lang/types': 1.0.0-beta.1
 
-  '@noir-lang/types@1.0.0-beta.0': {}
+  '@noir-lang/types@1.0.0-beta.1': {}
 
   '@nomicfoundation/edr-darwin-arm64@0.6.4': {}
 
