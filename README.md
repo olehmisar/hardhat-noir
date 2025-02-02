@@ -15,7 +15,7 @@ This plugin automatically manages `nargo` and `bb` versions and compiles Noir on
 Install the plugin and Noir dependencies:
 
 ```bash
-npm install hardhat-plugin-noir @noir-lang/noir_js@1.0.0-beta.1 @aztec/bb.js@0.63.1
+npm install hardhat-plugin-noir @noir-lang/noir_js@1.0.0-beta.1 @aztec/bb.js@0.66.0
 ```
 
 Import the plugin in your `hardhat.config.js`:

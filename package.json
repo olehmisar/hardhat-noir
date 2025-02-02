@@ -31,7 +31,7 @@
     "README.md"
   ],
   "devDependencies": {
-    "@aztec/bb.js": "0.63.1",
+    "@aztec/bb.js": "0.66.0",
     "@noir-lang/noir_js": "1.0.0-beta.1",
     "@noir-lang/types": "1.0.0-beta.1",
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
