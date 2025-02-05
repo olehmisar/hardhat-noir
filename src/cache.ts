@@ -82,7 +82,7 @@ export class NoirCache {
 }
 
 async function getToolingHash(config: HardhatConfig) {
-  return await sha256([config.noir.version, config.noir.bbVersion].join());
+  return await sha256(JSON.stringify(config.noir));
 }
 
 // TODO: i could not make it work. But should be using io-ts because hardhat already uses it and zod is a very heavy lib
