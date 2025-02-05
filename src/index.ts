@@ -43,11 +43,7 @@ extendConfig(
       u: HardhatUserConfig["noir"],
     ): HardhatConfig["noir"] {
       const bbVersionMap: Record<string, string> = {
-        "0.37.0": "0.61.0",
-        "0.38.0": "0.61.0",
-        "0.39.0": "0.63.1",
-        "1.0.0-beta.0": "0.63.1",
-        "1.0.0-beta.1": "0.66.0",
+        "1.0.0-beta.1": "0.67.0",
       };
       u = u || {};
       const version = u.version;

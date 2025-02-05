@@ -19,7 +19,7 @@
   "scripts": {
     "lint:fix": "prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
     "lint": "tsc --noEmit && prettier --check 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
-    "test": "mocha --exit --recursive 'test/**/*.test.ts'",
+    "test": "mocha --exit --recursive 'test/**/*.test.ts' && tsc --noEmit",
     "build": "rm -rf dist && tsc",
     "watch": "tsc -w",
     "prepublishOnly": "pnpm test && pnpm build"
@@ -31,7 +31,7 @@
     "README.md"
   ],
   "devDependencies": {
-    "@aztec/bb.js": "0.66.0",
+    "@aztec/bb.js": "0.67.0",
     "@noir-lang/noir_js": "1.0.0-beta.1",
     "@noir-lang/types": "1.0.0-beta.1",
     "@nomicfoundation/hardhat-ethers": "^3.0.8",

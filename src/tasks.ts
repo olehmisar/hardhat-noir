@@ -29,7 +29,6 @@ task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
     const cache = await NoirCache.fromConfig(config);
     if ((await cache.haveSourceFilesChanged()) || force) {
       console.log("Compiling Noir circuits...");
-      const runCommand = makeRunCommand(config.paths.noir);
       await runCommand(`${nargoBinary} compile`);
       await cache.saveSourceFilesHash();
       console.log("Compiled Noir circuits");
@@ -119,7 +118,6 @@ async function checkNargoWorkspace(config: HardhatConfig) {
 
   const fs = await import("fs");
   const path = await import("path");
-  // use .includes(`"${name}"`) to check toml
 
   const root = config.paths.noir;
   const members = fs
