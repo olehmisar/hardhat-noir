@@ -3,7 +3,7 @@
 // To extend one of Hardhat's types, you need to import the module where it has been defined, and redeclare it.
 import "hardhat/types/config";
 import "hardhat/types/runtime";
-import { NoirExtension } from "./Noir";
+import { NoirExtension, ProofFlavor } from "./Noir";
 
 declare module "hardhat/types/config" {
   // This is an example of an extension to one of the Hardhat config values.
@@ -29,12 +29,15 @@ declare module "hardhat/types/config" {
     noir: {
       version: string;
       bbVersion?: string;
+      flavor?: ProofFlavor | ProofFlavor[];
       skipNargoWorkspaceCheck?: boolean;
     };
   }
 
   export interface HardhatConfig {
-    noir: NonNullable<Required<HardhatUserConfig["noir"]>>;
+    noir: Omit<Required<HardhatUserConfig["noir"]>, "flavor"> & {
+      flavor: ProofFlavor[];
+    };
   }
 }
 

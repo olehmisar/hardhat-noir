@@ -2,7 +2,7 @@ import { extendConfig, extendEnvironment } from "hardhat/config";
 import { HardhatPluginError, lazyObject } from "hardhat/plugins";
 import { HardhatConfig, HardhatUserConfig } from "hardhat/types";
 import path from "path";
-import { NoirExtension } from "./Noir";
+import { NoirExtension, ProofFlavor } from "./Noir";
 import "./tasks";
 import "./type-extensions";
 import { PLUGIN_NAME } from "./utils";
@@ -54,9 +54,15 @@ extendConfig(
           `cannot infer bb version for noir@${version}. Please specify \`noir.bbVersion\` in Hardhat config`,
         );
       }
+      const flavor: ProofFlavor[] = u.flavor
+        ? Array.isArray(u.flavor)
+          ? u.flavor
+          : [u.flavor]
+        : [ProofFlavor.ultra_keccak_honk];
       return {
         version,
         bbVersion,
+        flavor,
         skipNargoWorkspaceCheck: u.skipNargoWorkspaceCheck ?? false,
       };
     }

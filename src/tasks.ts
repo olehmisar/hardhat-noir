@@ -8,12 +8,11 @@ import { HardhatPluginError } from "hardhat/plugins";
 import { HardhatConfig } from "hardhat/types";
 import { NoirCache } from "./cache";
 import { installBb, installNargo } from "./install";
-import { getTarget } from "./Noir";
+import { getTarget, ProofFlavor } from "./Noir";
 import { makeRunCommand, PLUGIN_NAME } from "./utils";
 
 task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
   async (args, { config }, runSuper) => {
-    const path = await import("path");
     const noirDir = config.paths.noir;
     const targetDir = await getTarget(noirDir);
 
@@ -42,16 +41,19 @@ task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
           return;
         }
 
-        const name = path.basename(file, ".json");
-        console.log(`Generating Solidity verifier for ${name}...`);
-        await runCommand(
-          `${bbBinary} write_vk -b ${targetDir}/${name}.json -o ${targetDir}/${name}_vk`,
-        );
-        await runCommand(
-          `${bbBinary} contract -k ${targetDir}/${name}_vk -o ${targetDir}/${name}.sol`,
-        );
+        for (const flavor of Object.values(ProofFlavor) as ProofFlavor[]) {
+          if (!config.noir.flavor.includes(flavor)) {
+            continue;
+          }
+          await generateSolidityVerifier(
+            config,
+            file,
+            bbBinary,
+            targetDir,
+            flavor,
+          );
+        }
         await cache.saveJsonFileHash(file);
-        console.log(`Generated Solidity verifier for ${name}`);
       }),
     );
 
@@ -104,6 +106,54 @@ task(
     return [...paths, ...noirPaths];
   },
 );
+
+async function generateSolidityVerifier(
+  config: HardhatConfig,
+  file: string,
+  bbBinary: string,
+  targetDir: string,
+  flavor: ProofFlavor,
+) {
+  if (flavor === "ultra_honk") {
+    console.log(
+      `Skipping ${flavor} verifier generation for ${file}. If you want to generate it, use ${ProofFlavor.ultra_keccak_honk} instead.`,
+    );
+    return;
+  }
+
+  const path = await import("path");
+
+  const runCommand = makeRunCommand(config.paths.noir);
+
+  const name = path.basename(file, ".json");
+  console.log(`Generating Solidity ${flavor} verifier for ${name}...`);
+  let writeVkCmd: string, contractCmd: string;
+  switch (flavor) {
+    case "ultra_plonk": {
+      writeVkCmd = "write_vk";
+      contractCmd = "contract";
+      break;
+    }
+    case "ultra_keccak_honk": {
+      writeVkCmd = "write_vk_ultra_keccak_honk";
+      contractCmd = "contract_ultra_honk";
+      break;
+    }
+    default: {
+      flavor satisfies never;
+      return;
+    }
+  }
+  const nameSuffix =
+    flavor === ProofFlavor.ultra_keccak_honk ? "" : `_${flavor}`;
+  await runCommand(
+    `${bbBinary} ${writeVkCmd} -b ${targetDir}/${name}.json -o ${targetDir}/${name}${nameSuffix}_vk`,
+  );
+  await runCommand(
+    `${bbBinary} ${contractCmd} -k ${targetDir}/${name}${nameSuffix}_vk -o ${targetDir}/${name}${nameSuffix}.sol`,
+  );
+  console.log(`Generated Solidity ${flavor} verifier for ${name}`);
+}
 
 async function checkNargoWorkspace(config: HardhatConfig) {
   if (config.noir.skipNargoWorkspaceCheck) {
