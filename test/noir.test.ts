@@ -71,10 +71,13 @@ describe("Integration tests examples", function () {
       expect(result).to.eq(true);
 
       // You can also verify in JavaScript.
-      const resultJs = await backend.verifyProof({
-        proof,
-        publicInputs: [String(input.y)],
-      });
+      const resultJs = await backend.verifyProof(
+        {
+          proof,
+          publicInputs: [String(input.y)],
+        },
+        { keccak: true },
+      );
       expect(resultJs).to.eq(true);
     });
 
