@@ -12,7 +12,7 @@ import { getTarget } from "./Noir";
 import { makeRunCommand, PLUGIN_NAME } from "./utils";
 
 task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
-  async (_, { config }, runSuper) => {
+  async (args, { config }, runSuper) => {
     const path = await import("path");
     const noirDir = config.paths.noir;
     const targetDir = await getTarget(noirDir);
@@ -25,8 +25,9 @@ task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
     await checkNargoWorkspace(config);
     await addGitIgnore(noirDir);
 
+    const force = !!args.force;
     const cache = await NoirCache.fromConfig(config);
-    if (await cache.haveSourceFilesChanged()) {
+    if ((await cache.haveSourceFilesChanged()) || force) {
       console.log("Compiling Noir circuits...");
       const runCommand = makeRunCommand(config.paths.noir);
       await runCommand(`${nargoBinary} compile`);
@@ -38,7 +39,7 @@ task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
     const jsonFiles = glob.sync(`${targetDir}/*.json`);
     await Promise.all(
       jsonFiles.map(async (file) => {
-        if (!(await cache.hasJsonFileChanged(file))) {
+        if (!(await cache.hasJsonFileChanged(file)) && !force) {
           return;
         }
 
@@ -133,7 +134,7 @@ async function checkNargoWorkspace(config: HardhatConfig) {
       `
 [workspace]
 members = [
-${members.map((m) => `"${m}"`).join(",\n")}
+  ${members.map((m) => `"${m}"`).join(",\n")}
 ]
       `.trim() + "\n",
     );
