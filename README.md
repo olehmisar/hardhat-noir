@@ -172,7 +172,7 @@ export default {
     // default is "ultra_keccak_honk"
     flavor: "ultra_plonk",
     // you can also specify multiple flavors
-    flavor: ["ultra_keccak_honk", "ultra_plonk"],
+    // flavor: ["ultra_keccak_honk", "ultra_plonk"],
   },
 };
 ```
