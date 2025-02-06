@@ -79,10 +79,10 @@ Use the verifier contract in Solidity:
 
 ```solidity
 // contracts/MyContract.sol
-import {UltraVerifier} from "../noir/target/my_noir.sol";
+import {HonkVerifier} from "../noir/target/my_noir.sol";
 
 contract MyContract {
-    UltraVerifier public verifier = new UltraVerifier();
+    HonkVerifier public verifier = new HonkVerifier();
 
     function verify(bytes calldata proof, uint256 y) external view returns (bool) {
         bytes32[] memory publicInputs = new bytes32[](1);
@@ -110,19 +110,25 @@ it("proves and verifies on-chain", async () => {
   const { noir, backend } = await hre.noir.getCircuit("my_noir");
   const input = { x: 1, y: 2 };
   const { witness } = await noir.execute(input);
-  const { proof, publicInputs } = await backend.generateProof(witness);
+  const { proof, publicInputs } = await backend.generateProof(witness, {
+    keccak: true,
+  });
   // it matches because we marked y as `pub` in `main.nr`
   expect(BigInt(publicInputs[0])).to.eq(BigInt(input.y));
 
   // Verify the proof on-chain
-  const result = await contract.verify(proof, input.y);
+  // slice the proof to remove length information
+  const result = await contract.verify(proof.slice(4), input.y);
   expect(result).to.eq(true);
 
   // You can also verify in JavaScript.
-  const resultJs = await backend.verifyProof({
-    proof,
-    publicInputs: [String(input.y)],
-  });
+  const resultJs = await backend.verifyProof(
+    {
+      proof,
+      publicInputs: [String(input.y)],
+    },
+    { keccak: true },
+  );
   expect(resultJs).to.eq(true);
 });
 ```
@@ -141,7 +147,7 @@ output of `npx hardhat help example`
 
 This plugin extends the Hardhat Runtime Environment by adding a `noir` field.
 
-You can call `hre.noir.getCircuit(name)` to get a compiled circuit JSON.
+You can call `hre.noir.getCircuit(name, backendClass)` to get a compiled circuit JSON.
 
 ## Configuration
 
@@ -154,6 +160,19 @@ export default {
     version: "1.0.0-beta.1",
     // bb version, optional, will be inferred if possible
     bbVersion: "0.67.0",
+  },
+};
+```
+
+Change the proof flavor. It will generate different Solidity verifiers. If you switch to `ultra_plonk`, use `noir.getCircuit(name, UltraPlonkBackend)` to get ultra plonk backend.
+
+```js
+export default {
+  noir: {
+    // default is "ultra_keccak_honk"
+    flavor: "ultra_plonk",
+    // you can also specify multiple flavors
+    // flavor: ["ultra_keccak_honk", "ultra_plonk"],
   },
 };
 ```

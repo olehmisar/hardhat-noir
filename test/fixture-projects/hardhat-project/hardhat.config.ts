@@ -1,4 +1,5 @@
 // We load the plugin here.
+import "@nomicfoundation/hardhat-ethers";
 import { HardhatUserConfig } from "hardhat/types";
 
 import "../../../src/index";
@@ -20,6 +21,7 @@ const config: HardhatUserConfig = {
   },
   noir: {
     version: TEST_NOIR_VERSION,
+    flavor: ["ultra_keccak_honk", "ultra_plonk"],
   },
 };
 

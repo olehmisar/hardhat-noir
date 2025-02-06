@@ -1,4 +1,5 @@
 // tslint:disable-next-line no-implicit-dependencies
+import { UltraPlonkBackend } from "@aztec/bb.js";
 import { assert, expect } from "chai";
 import fs from "fs";
 import { TASK_CLEAN, TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
@@ -43,6 +44,74 @@ describe("Integration tests examples", function () {
       expect(exists).to.be.eq(true);
       fs.rmSync(dir, { recursive: true });
     });
+
+    it("proves and verifies on-chain", async function () {
+      await this.hre.run("compile");
+
+      // Deploy a verifier contract
+      const contractFactory =
+        await this.hre.ethers.getContractFactory("MyContract");
+      const contract = await contractFactory.deploy();
+      await contract.waitForDeployment();
+
+      // Generate a proof
+      const { noir, backend } = await this.hre.noir.getCircuit("my_circuit");
+      const input = { x: 1, y: 2 };
+      const { witness } = await noir.execute(input);
+      const { proof, publicInputs } = await backend.generateProof(witness, {
+        keccak: true,
+      });
+      // it matches because we marked y as `pub` in `main.nr`
+      expect(BigInt(publicInputs[0])).to.eq(BigInt(input.y));
+
+      // Verify the proof on-chain
+      const result = await contract.verify(proof.slice(4), input.y);
+      expect(result).to.eq(true);
+
+      // You can also verify in JavaScript.
+      const resultJs = await backend.verifyProof(
+        {
+          proof,
+          publicInputs: [String(input.y)],
+        },
+        { keccak: true },
+      );
+      expect(resultJs).to.eq(true);
+    });
+
+    it("proves and verifies on-chain ultra_plonk", async function () {
+      await this.hre.run("compile");
+
+      // Deploy a verifier contract
+      const contractFactory =
+        await this.hre.ethers.getContractFactory("UltraVerifier");
+      const contract = await contractFactory.deploy();
+      await contract.waitForDeployment();
+
+      // Generate a proof
+      const { noir, backend } = await this.hre.noir.getCircuit(
+        "my_circuit",
+        UltraPlonkBackend,
+      );
+      const input = { x: 1, y: 2 };
+      const { witness } = await noir.execute(input);
+      const { proof, publicInputs } = await backend.generateProof(witness);
+      // it matches because we marked y as `pub` in `main.nr`
+      expect(BigInt(publicInputs[0])).to.eq(BigInt(input.y));
+
+      // Verify the proof on-chain
+      const result = await contract.verify(proof, [
+        this.hre.ethers.toBeHex(input.y, 32),
+      ]);
+      expect(result).to.eq(true);
+
+      // You can also verify in JavaScript.
+      const resultJs = await backend.verifyProof({
+        proof,
+        publicInputs: [String(input.y)],
+      });
+      expect(resultJs).to.eq(true);
+    });
   });
 
   describe("HardhatConfig extension", function () {
@@ -63,7 +132,7 @@ describe("Integration tests examples", function () {
       await this.hre.run("compile");
 
       const contractFactory =
-        await this.hre.ethers.getContractFactory("UltraVerifier");
+        await this.hre.ethers.getContractFactory("HonkVerifier");
       const contract = await contractFactory.deploy();
       await contract.waitForDeployment();
       console.log("verifier", await contract.getAddress());
