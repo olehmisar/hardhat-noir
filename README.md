@@ -117,7 +117,8 @@ it("proves and verifies on-chain", async () => {
   expect(BigInt(publicInputs[0])).to.eq(BigInt(input.y));
 
   // Verify the proof on-chain
-  const result = await contract.verify(proof, input.y);
+  // slice the proof to remove length information
+  const result = await contract.verify(proof.slice(4), input.y);
   expect(result).to.eq(true);
 
   // You can also verify in JavaScript.

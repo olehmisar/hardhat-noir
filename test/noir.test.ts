@@ -65,7 +65,7 @@ describe("Integration tests examples", function () {
       expect(BigInt(publicInputs[0])).to.eq(BigInt(input.y));
 
       // Verify the proof on-chain
-      const result = await contract.verify(proof, [
+      const result = await contract.verify(proof.slice(4), [
         this.hre.ethers.toBeHex(input.y, 32),
       ]);
       expect(result).to.eq(true);
