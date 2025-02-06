@@ -164,6 +164,19 @@ export default {
 };
 ```
 
+Change the proof flavor. It will generate different Solidity verifiers. If you switch to `ultra_plonk`, use `noir.getCircuit(name, UltraPlonkBackend)` to get ultra plonk backend.
+
+```js
+export default {
+  noir: {
+    // default is "ultra_keccak_honk"
+    flavor: "ultra_plonk",
+    // you can also specify multiple flavors
+    flavor: ["ultra_keccak_honk", "ultra_plonk"],
+  },
+};
+```
+
 The default folder where Noir is located is `noir`. You can change it in `hardhat.config.js`:
 
 ```js
