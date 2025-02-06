@@ -1,22 +1,20 @@
 import { HardhatConfig } from "hardhat/types";
 import { z } from "zod";
 import { getFileHash, getHashOfNoirWorkspace, sha256 } from "./hash";
-import { getTarget } from "./Noir";
 
-const CACHE_FILENAME = ".noir-hardhat-cache";
+const CACHE_FILENAME = "noir-files-cache.json";
 
 export class NoirCache {
   constructor(
     private cache: CacheSchema,
-    private noirDir: string,
+    private config: HardhatConfig,
   ) {}
 
   static async fromConfig(config: HardhatConfig) {
     const fs = await import("fs");
     const path = await import("path");
-    const targetDir = await getTarget(config.paths.noir);
 
-    const cacheFile = path.join(targetDir, CACHE_FILENAME); // to store the cache
+    const cacheFile = path.join(config.paths.cache, CACHE_FILENAME); // to store the cache
     if (!fs.existsSync(cacheFile)) {
       return await this.empty(config);
     }
@@ -33,7 +31,7 @@ export class NoirCache {
     if (cacheJson.toolingVersions !== toolingVersions) {
       return await this.empty(config);
     }
-    return new NoirCache(cacheJson, config.paths.noir);
+    return new NoirCache(cacheJson, config);
   }
 
   static async empty(config: HardhatConfig) {
@@ -43,7 +41,7 @@ export class NoirCache {
         sourceFiles: "",
         jsonFiles: {},
       },
-      config.paths.noir,
+      config,
     );
   }
 
@@ -69,13 +67,17 @@ export class NoirCache {
     await this.#save();
   }
 
+  private get noirDir() {
+    return this.config.paths.noir;
+  }
+
   async #save() {
     const fs = await import("fs");
     const path = await import("path");
-    const targetDir = await getTarget(this.noirDir);
-    fs.mkdirSync(targetDir, { recursive: true });
+    const cacheDir = this.config.paths.cache;
+    fs.mkdirSync(cacheDir, { recursive: true });
     await fs.promises.writeFile(
-      path.join(targetDir, CACHE_FILENAME),
+      path.join(cacheDir, CACHE_FILENAME),
       JSON.stringify(this.cache),
     );
   }
