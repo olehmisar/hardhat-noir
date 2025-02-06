@@ -50,7 +50,7 @@ describe("Integration tests examples", function () {
 
       // Deploy a verifier contract
       const contractFactory =
-        await this.hre.ethers.getContractFactory("HonkVerifier");
+        await this.hre.ethers.getContractFactory("MyContract");
       const contract = await contractFactory.deploy();
       await contract.waitForDeployment();
 
@@ -65,9 +65,7 @@ describe("Integration tests examples", function () {
       expect(BigInt(publicInputs[0])).to.eq(BigInt(input.y));
 
       // Verify the proof on-chain
-      const result = await contract.verify(proof.slice(4), [
-        this.hre.ethers.toBeHex(input.y, 32),
-      ]);
+      const result = await contract.verify(proof.slice(4), input.y);
       expect(result).to.eq(true);
 
       // You can also verify in JavaScript.
