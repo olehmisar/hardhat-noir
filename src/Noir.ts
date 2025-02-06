@@ -64,7 +64,6 @@ export async function getTarget(noirDir: string | HardhatConfig) {
 
 export type ProofFlavor = keyof typeof ProofFlavor;
 export const ProofFlavor = {
-  ultra_honk: "ultra_honk",
   ultra_keccak_honk: "ultra_keccak_honk",
   ultra_plonk: "ultra_plonk",
 } as const;

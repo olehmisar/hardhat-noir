@@ -114,13 +114,6 @@ async function generateSolidityVerifier(
   targetDir: string,
   flavor: ProofFlavor,
 ) {
-  if (flavor === "ultra_honk") {
-    console.log(
-      `Skipping ${flavor} verifier generation for ${file}. If you want to generate it, use ${ProofFlavor.ultra_keccak_honk} instead.`,
-    );
-    return;
-  }
-
   const path = await import("path");
 
   const runCommand = makeRunCommand(config.paths.noir);
