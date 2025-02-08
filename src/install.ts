@@ -1,4 +1,5 @@
-import { makeRunCommand } from "./utils";
+import { HardhatPluginError } from "hardhat/plugins";
+import { makeRunCommand, PLUGIN_NAME } from "./utils";
 
 const installationSeparator = "hardhat";
 
@@ -9,9 +10,10 @@ async function installNoirup() {
   if (!fs.existsSync(noirupBinary)) {
     const runCommand = makeRunCommand();
     console.log("Installing noirup");
-    await runCommand(
-      "curl -L https://raw.githubusercontent.com/noir-lang/noirup/main/install | bash",
+    const installScript = await downloadScript(
+      "https://raw.githubusercontent.com/noir-lang/noirup/main/install",
     );
+    await runCommand("bash", ["-c", installScript]);
   }
   return noirupBinary;
 }
@@ -33,9 +35,9 @@ export async function installNargo(version: string) {
     const nargoBinDir = path.dirname(nargoBinary);
     fs.mkdirSync(path.join(nargoBinDir), { recursive: true });
     console.log(`Installing nargo@${version} in ${nargoBinDir}`);
-    await runCommand(
-      `NARGO_HOME=${path.dirname(nargoBinDir)} ${noirupBinary} -v ${version}`,
-    );
+    await runCommand(noirupBinary, ["-v", version], {
+      env: { NARGO_HOME: path.dirname(nargoBinDir) },
+    });
   }
   return nargoBinary;
 }
@@ -53,9 +55,10 @@ async function installBbup() {
   if (!fs.existsSync(bbupBinary)) {
     const runCommand = makeRunCommand();
     console.log("Installing bbup");
-    await runCommand(
-      `curl -L https://raw.githubusercontent.com/AztecProtocol/aztec-packages/master/barretenberg/cpp/installation/install | bash`,
+    const installScript = await downloadScript(
+      "https://raw.githubusercontent.com/AztecProtocol/aztec-packages/master/barretenberg/cpp/installation/install",
     );
+    await runCommand("bash", ["-c", installScript]);
   }
   return bbupBinary;
 }
@@ -77,7 +80,9 @@ export async function installBb(bbVersion: string): Promise<string> {
     const bbDir = path.dirname(bbBinary);
     fs.mkdirSync(bbDir, { recursive: true });
     console.log(`Installing bb@${bbVersion} in ${bbDir}`);
-    await runCommand(`BB_HOME=${bbDir} ${bbupBinary} -v ${bbVersion}`);
+    await runCommand(bbupBinary, ["-v", bbVersion], {
+      env: { BB_HOME: bbDir },
+    });
   }
   return bbBinary;
 }
@@ -86,4 +91,12 @@ async function getBbHome() {
   const os = await import("os");
   const path = await import("path");
   return path.join(os.homedir(), ".bb");
+}
+
+async function downloadScript(url: string) {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new HardhatPluginError(PLUGIN_NAME, `Failed to download ${url}`);
+  }
+  return await res.text();
 }
