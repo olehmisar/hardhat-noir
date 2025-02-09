@@ -18,13 +18,7 @@ Install the plugin and Noir dependencies:
 npm install hardhat-plugin-noir @noir-lang/noir_js@1.0.0-beta.1 @aztec/bb.js@0.67.0
 ```
 
-Import the plugin in your `hardhat.config.js`:
-
-```js
-require("hardhat-plugin-noir");
-```
-
-Or if you are using TypeScript, in your `hardhat.config.ts`:
+Import the plugin in your `hardhat.config.ts`:
 
 ```ts
 import "hardhat-plugin-noir";
@@ -32,22 +26,16 @@ import "hardhat-plugin-noir";
 
 Specify the Noir version in your Hardhat config:
 
-**You must enable Solidity optimizer in order to be able to deploy Solidity verifier contracts.**
-
-```js
+```ts
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.27",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 100000000,
-      },
-    },
+    // enable optimizer to deploy Solidity verifier contracts
+    settings: { optimizer: { enabled: true, runs: 100000000 } },
   },
   noir: {
     version: "1.0.0-beta.1",
-  }
+  },
 };
 ```
 
