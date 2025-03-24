@@ -1,49 +1,29 @@
 import { HardhatPluginError } from "hardhat/plugins";
-import type { SpawnOptions } from "node:child_process";
 
 export const PLUGIN_NAME = "hardhat-plugin-noir";
 
-export const makeRunCommand =
-  (cwd?: string) =>
-  async (
-    command: string,
-    args: (string | number)[],
-    options?: Pick<SpawnOptions, "env">,
-  ) => {
-    const { spawn } = await import("node:child_process");
-
-    const spawned = spawn(
-      command,
-      args.map((arg) => arg.toString()),
-      { ...options, cwd },
+export const makeRunCommand = (cwd?: string) => async (command: string) => {
+  const { exec } = await import("child_process");
+  const { promisify } = await import("util");
+  const execAsync = promisify(exec);
+  // TODO(security): escape command arguments (use template strings)
+  try {
+    const { stdout, stderr } = await execAsync(command, {
+      cwd,
+      maxBuffer: Infinity,
+    });
+    if (stdout) {
+      console.log(stdout);
+    }
+    if (stderr) {
+      console.error(stderr);
+    }
+  } catch (error) {
+    console.error(`Error executing command: ${command}`);
+    console.error((error as any).stderr || (error as any).message); // Log only error messages
+    throw new HardhatPluginError(
+      PLUGIN_NAME,
+      `Error executing command: ${command}`,
     );
-    spawned.stdout.on("data", (data) => {
-      process.stdout.write(data);
-    });
-
-    spawned.stderr.on("data", (data) => {
-      process.stderr.write(data);
-    });
-
-    return await new Promise<void>((resolve, reject) => {
-      spawned.on("close", (code: number) => {
-        if (code !== 0) {
-          reject(new Error(`Process exited with code ${code}`));
-          return;
-        }
-
-        resolve();
-      });
-
-      spawned.on("error", (err) => {
-        reject(
-          new HardhatPluginError(
-            PLUGIN_NAME,
-            `Error executing command \`${
-              command + " " + args.join(" ")
-            }\`: ${err.message}`,
-          ),
-        );
-      });
-    });
-  };
+  }
+};

@@ -28,7 +28,7 @@ task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
     const cache = await NoirCache.fromConfig(config);
     if ((await cache.haveSourceFilesChanged()) || force) {
       console.log("Compiling Noir circuits...");
-      await runCommand(nargoBinary, ["compile"]);
+      await runCommand(`${nargoBinary} compile`);
       await cache.saveSourceFilesHash();
       console.log("Compiled Noir circuits");
     }
@@ -88,11 +88,9 @@ task("noir-new", "Create a new Noir package")
     const nargoBinary = await installNargo(config.noir.version);
     const runCommand = makeRunCommand(config.paths.noir);
     fs.mkdirSync(config.paths.noir, { recursive: true });
-    const cmdArgs = ["new", args.name];
-    if (args.lib) {
-      cmdArgs.push("--lib");
-    }
-    await runCommand(nargoBinary, cmdArgs);
+    await runCommand(
+      `${nargoBinary} new ${args.name} ${args.lib ? "--lib" : ""}`,
+    );
   });
 
 task(
@@ -141,20 +139,12 @@ async function generateSolidityVerifier(
   }
   const nameSuffix =
     flavor === ProofFlavor.ultra_keccak_honk ? "" : `_${flavor}`;
-  await runCommand(bbBinary, [
-    writeVkCmd,
-    "-b",
-    `${targetDir}/${name}.json`,
-    "-o",
-    `${targetDir}/${name}${nameSuffix}_vk`,
-  ]);
-  await runCommand(bbBinary, [
-    contractCmd,
-    "-k",
-    `${targetDir}/${name}${nameSuffix}_vk`,
-    "-o",
-    `${targetDir}/${name}${nameSuffix}.sol`,
-  ]);
+  await runCommand(
+    `${bbBinary} ${writeVkCmd} -b ${targetDir}/${name}.json -o ${targetDir}/${name}${nameSuffix}_vk`,
+  );
+  await runCommand(
+    `${bbBinary} ${contractCmd} -k ${targetDir}/${name}${nameSuffix}_vk -o ${targetDir}/${name}${nameSuffix}.sol`,
+  );
   console.log(`Generated Solidity ${flavor} verifier for ${name}`);
 }
 
