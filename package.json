@@ -18,8 +18,8 @@
   ],
   "scripts": {
     "lint:fix": "prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
-    "lint": "tsc --noEmit && prettier --check 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
-    "test": "mocha --exit --recursive 'test/**/*.test.ts' && tsc --noEmit",
+    "lint": "tsc --noEmit --skipLibCheck && prettier --check 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
+    "test": "mocha --exit --recursive 'test/**/*.test.ts' && pnpm lint",
     "build": "rm -rf dist && tsc",
     "watch": "tsc -w",
     "prepublishOnly": "pnpm test && pnpm build"
