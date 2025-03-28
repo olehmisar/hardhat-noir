@@ -79,7 +79,7 @@ describe("Integration tests examples", function () {
       expect(resultJs).to.eq(true);
     });
 
-    it("proves and verifies on-chain ultra_plonk", async function () {
+    it("proves and verifies ultra_plonk on-chain", async function () {
       await this.hre.run("compile");
 
       // Deploy a verifier contract
