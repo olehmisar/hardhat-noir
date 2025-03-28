@@ -65,7 +65,7 @@ describe("Integration tests examples", function () {
       expect(BigInt(publicInputs[0])).to.eq(BigInt(input.y));
 
       // Verify the proof on-chain
-      const result = await contract.verify(proof.slice(4), input.y);
+      const result = await contract.verify(proof, input.y);
       expect(result).to.eq(true);
 
       // You can also verify in JavaScript.

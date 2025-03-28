@@ -106,7 +106,7 @@ it("proves and verifies on-chain", async () => {
 
   // Verify the proof on-chain
   // slice the proof to remove length information
-  const result = await contract.verify(proof.slice(4), input.y);
+  const result = await contract.verify(proof, input.y);
   expect(result).to.eq(true);
 
   // You can also verify in JavaScript.
