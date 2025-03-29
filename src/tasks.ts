@@ -1,4 +1,3 @@
-import type { UltraHonkBackend, UltraPlonkBackend } from "@aztec/bb.js";
 import {
   TASK_CLEAN,
   TASK_COMPILE,
@@ -178,15 +177,18 @@ async function generateSolidityVerifier(
   const fs = await import("fs");
   const { UltraHonkBackend, UltraPlonkBackend } = await import("@aztec/bb.js");
 
-  let backend: UltraHonkBackend | UltraPlonkBackend;
+  let verifier: string;
   const program = JSON.parse(fs.readFileSync(file, "utf-8"));
   switch (flavor) {
     case "ultra_plonk": {
-      backend = new UltraPlonkBackend(program.bytecode);
+      const backend = new UltraPlonkBackend(program.bytecode);
+      verifier = await backend.getSolidityVerifier();
       break;
     }
     case "ultra_keccak_honk": {
-      backend = new UltraHonkBackend(program.bytecode);
+      const backend = new UltraHonkBackend(program.bytecode);
+      const vk = await backend.getVerificationKey({ keccak: true });
+      verifier = await backend.getSolidityVerifier(vk);
       break;
     }
     default: {
@@ -197,7 +199,6 @@ async function generateSolidityVerifier(
       );
     }
   }
-  let verifier = await backend.getSolidityVerifier();
   if (typeof verifier !== "string") {
     // bug in bb types
     verifier = new TextDecoder().decode(verifier);
