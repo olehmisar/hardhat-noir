@@ -38,7 +38,7 @@ describe("Integration tests examples", function () {
 
     it("creates a package", async function () {
       const name = "my_package";
-      await this.hre.run("noir-new", { name });
+      await this.hre.run("noir-new", { name, noAdd: true });
       const dir = path.join(this.hre.config.paths.noir, name);
       const exists = fs.existsSync(dir);
       expect(exists).to.be.eq(true);
