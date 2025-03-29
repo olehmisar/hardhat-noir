@@ -15,7 +15,7 @@ This plugin automatically manages `nargo` and `bb` versions and compiles Noir on
 Install the plugin and Noir dependencies:
 
 ```bash
-npm install hardhat-plugin-noir @noir-lang/noir_js@1.0.0-beta.1 @aztec/bb.js@0.67.0
+npm install hardhat-plugin-noir @noir-lang/noir_js@1.0.0-beta.3 @aztec/bb.js@0.82.3
 ```
 
 Import the plugin in your `hardhat.config.ts`:
@@ -34,7 +34,7 @@ const config: HardhatUserConfig = {
     settings: { optimizer: { enabled: true, runs: 100000000 } },
   },
   noir: {
-    version: "1.0.0-beta.1",
+    version: "1.0.0-beta.3",
   },
 };
 ```
@@ -106,7 +106,7 @@ it("proves and verifies on-chain", async () => {
 
   // Verify the proof on-chain
   // slice the proof to remove length information
-  const result = await contract.verify(proof.slice(4), input.y);
+  const result = await contract.verify(proof, input.y);
   expect(result).to.eq(true);
 
   // You can also verify in JavaScript.
@@ -145,9 +145,7 @@ Configure Noir and Barretenberg (bb) versions in `hardhat.config.ts`:
 export default {
   noir: {
     // Noir version, optional, will use the latest known Noir version by default
-    version: "1.0.0-beta.1",
-    // bb version, optional, will be inferred if possible
-    bbVersion: "0.67.0",
+    version: "1.0.0-beta.3",
   },
 };
 ```

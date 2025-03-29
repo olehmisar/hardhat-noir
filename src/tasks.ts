@@ -7,7 +7,7 @@ import { task } from "hardhat/config";
 import { HardhatPluginError } from "hardhat/plugins";
 import { HardhatConfig } from "hardhat/types";
 import { NoirCache } from "./cache";
-import { installBb, installNargo } from "./install";
+import { installNargo } from "./install";
 import { getTarget, ProofFlavor } from "./Noir";
 import { makeRunCommand, PLUGIN_NAME } from "./utils";
 
@@ -19,7 +19,6 @@ task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
     const runCommand = makeRunCommand(config.paths.noir);
 
     const nargoBinary = await installNargo(config.noir.version);
-    const bbBinary = await installBb(config.noir.bbVersion);
 
     await checkNargoWorkspace(config);
     await addGitIgnore(noirDir);
@@ -45,13 +44,7 @@ task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
           if (!config.noir.flavor.includes(flavor)) {
             continue;
           }
-          await generateSolidityVerifier(
-            config,
-            file,
-            bbBinary,
-            targetDir,
-            flavor,
-          );
+          await generateSolidityVerifier(file, targetDir, flavor);
         }
         await cache.saveJsonFileHash(file);
       }),
@@ -110,51 +103,46 @@ task(
 );
 
 async function generateSolidityVerifier(
-  config: HardhatConfig,
   file: string,
-  bbBinary: string,
   targetDir: string,
   flavor: ProofFlavor,
 ) {
   const path = await import("path");
+  const fs = await import("fs");
+  const { UltraHonkBackend, UltraPlonkBackend } = await import("@aztec/bb.js");
 
-  const runCommand = makeRunCommand(config.paths.noir);
-
-  const name = path.basename(file, ".json");
-  console.log(`Generating Solidity ${flavor} verifier for ${name}...`);
-  let writeVkCmd: string, contractCmd: string;
+  let verifier: string;
+  const program = JSON.parse(fs.readFileSync(file, "utf-8"));
   switch (flavor) {
     case "ultra_plonk": {
-      writeVkCmd = "write_vk";
-      contractCmd = "contract";
+      const backend = new UltraPlonkBackend(program.bytecode);
+      verifier = await backend.getSolidityVerifier();
       break;
     }
     case "ultra_keccak_honk": {
-      writeVkCmd = "write_vk_ultra_keccak_honk";
-      contractCmd = "contract_ultra_honk";
+      const backend = new UltraHonkBackend(program.bytecode);
+      const vk = await backend.getVerificationKey({ keccak: true });
+      verifier = await backend.getSolidityVerifier(vk);
       break;
     }
     default: {
       flavor satisfies never;
-      return;
+      throw new HardhatPluginError(
+        PLUGIN_NAME,
+        `Unsupported Noir proof flavor: ${flavor}`,
+      );
     }
   }
+  if (typeof verifier !== "string") {
+    // bug in bb types
+    verifier = new TextDecoder().decode(verifier);
+  }
+
+  const name = path.basename(file, ".json");
+  console.log(`Generating Solidity ${flavor} verifier for ${name}...`);
   const nameSuffix =
     flavor === ProofFlavor.ultra_keccak_honk ? "" : `_${flavor}`;
-  await runCommand(bbBinary, [
-    writeVkCmd,
-    "-b",
-    `${targetDir}/${name}.json`,
-    "-o",
-    `${targetDir}/${name}${nameSuffix}_vk`,
-  ]);
-  await runCommand(bbBinary, [
-    contractCmd,
-    "-k",
-    `${targetDir}/${name}${nameSuffix}_vk`,
-    "-o",
-    `${targetDir}/${name}${nameSuffix}.sol`,
-  ]);
+  fs.writeFileSync(path.join(targetDir, `${name}${nameSuffix}.sol`), verifier);
   console.log(`Generated Solidity ${flavor} verifier for ${name}`);
 }
 

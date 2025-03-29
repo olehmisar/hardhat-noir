@@ -1,6 +1,6 @@
 {
   "name": "hardhat-plugin-noir",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Hardhat plugin for Noir language",
   "repository": "github:olehmisar/hardhat-noir",
   "author": "Oleh Misarosh <olehmisar@gmail.com>",
@@ -18,8 +18,8 @@
   ],
   "scripts": {
     "lint:fix": "prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
-    "lint": "tsc --noEmit && prettier --check 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
-    "test": "mocha --exit --recursive 'test/**/*.test.ts' && tsc --noEmit",
+    "lint": "tsc --noEmit --skipLibCheck && prettier --check 'src/**/*.{js,ts}' 'test/**/*.{js,ts}'",
+    "test": "mocha --exit --recursive 'test/**/*.test.ts' && pnpm lint",
     "build": "rm -rf dist && tsc",
     "watch": "tsc -w",
     "prepublishOnly": "pnpm test && pnpm build"
@@ -31,8 +31,7 @@
     "README.md"
   ],
   "devDependencies": {
-    "@aztec/bb.js": "0.67.0",
-    "@noir-lang/noir_js": "1.0.0-beta.1",
+    "@noir-lang/noir_js": "1.0.0-beta.3",
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@types/chai": "^5.0.0",
     "@types/mocha": "^10.0.9",
@@ -48,6 +47,7 @@
     "hardhat": "^2.0.0"
   },
   "dependencies": {
+    "@aztec/bb.js": ">=0.82.0",
     "glob": "^11.0.0",
     "zod": "^3.23.8"
   }
