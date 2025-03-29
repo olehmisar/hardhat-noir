@@ -91,10 +91,6 @@ task("noir-new", "Create a new Noir package")
       );
     }
 
-    const newPath = path.join(config.paths.noir, args.name);
-    const srcPath = path.join(newPath, "src");
-    fs.mkdirSync(srcPath, { recursive: true });
-
     const nargoBinary = await installNargo(config.noir.version);
     const runCommand = makeRunCommand(config.paths.noir);
     fs.mkdirSync(config.paths.noir, { recursive: true });
@@ -111,7 +107,9 @@ task("noir-new", "Create a new Noir package")
       };
       rootNargo.workspace ??= {};
       rootNargo.workspace.members ??= [];
-      rootNargo.workspace.members.push(args.name);
+      if (!rootNargo.workspace.members.includes(args.name)) {
+        rootNargo.workspace.members.push(args.name);
+      }
       fs.writeFileSync(rootNargoPath, toml.stringify(rootNargo));
     }
   });
