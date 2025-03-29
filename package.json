@@ -1,6 +1,6 @@
 {
   "name": "hardhat-plugin-noir",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Hardhat plugin for Noir language",
   "repository": "github:olehmisar/hardhat-noir",
   "author": "Oleh Misarosh <olehmisar@gmail.com>",
