@@ -42,26 +42,13 @@ extendConfig(
     function resolveNoirConfig(
       u: HardhatUserConfig["noir"],
     ): HardhatConfig["noir"] {
-      const bbVersionMap: Record<string, string> = {
-        "1.0.0-beta.3": "0.82.0",
-      };
-      u = u || {};
-      const version = u.version;
-      const bbVersion = u.bbVersion ?? bbVersionMap[version];
-      if (!bbVersion) {
-        throw new HardhatPluginError(
-          PLUGIN_NAME,
-          `cannot infer bb version for noir@${version}. Please specify \`noir.bbVersion\` in Hardhat config`,
-        );
-      }
       const flavor: ProofFlavor[] = u.flavor
         ? Array.isArray(u.flavor)
           ? u.flavor
           : [u.flavor]
         : [ProofFlavor.ultra_keccak_honk];
       return {
-        version,
-        bbVersion,
+        version: u.version,
         flavor,
         skipNargoWorkspaceCheck: u.skipNargoWorkspaceCheck ?? false,
       };

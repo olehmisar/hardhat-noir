@@ -28,7 +28,6 @@ declare module "hardhat/types/config" {
   export interface HardhatUserConfig {
     noir: {
       version: string;
-      bbVersion?: string;
       flavor?: ProofFlavor | ProofFlavor[];
       skipNargoWorkspaceCheck?: boolean;
     };

@@ -106,7 +106,7 @@ it("proves and verifies on-chain", async () => {
 
   // Verify the proof on-chain
   // slice the proof to remove length information
-  const result = await contract.verify(proof.slice(4), input.y);
+  const result = await contract.verify(proof, input.y);
   expect(result).to.eq(true);
 
   // You can also verify in JavaScript.
@@ -146,8 +146,6 @@ export default {
   noir: {
     // Noir version, optional, will use the latest known Noir version by default
     version: "1.0.0-beta.3",
-    // bb version, optional, will be inferred if possible
-    bbVersion: "0.82.0",
   },
 };
 ```
