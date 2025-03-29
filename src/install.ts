@@ -10,7 +10,7 @@ async function installNoirup() {
     const runCommand = makeRunCommand();
     console.log("Installing noirup");
     await runCommand(
-      "curl -L https://raw.githubusercontent.com/noir-lang/noirup/main/install | bash",
+      "curl -L https://raw.githubusercontent.com/noir-lang/noirup/refs/heads/main/install | bash",
     );
   }
   return noirupBinary;
@@ -54,7 +54,7 @@ async function installBbup() {
     const runCommand = makeRunCommand();
     console.log("Installing bbup");
     await runCommand(
-      `curl -L https://raw.githubusercontent.com/AztecProtocol/aztec-packages/master/barretenberg/cpp/installation/install | bash`,
+      `curl -L https://raw.githubusercontent.com/AztecProtocol/aztec-packages/refs/heads/master/barretenberg/bbup/install | bash`,
     );
   }
   return bbupBinary;
@@ -77,7 +77,7 @@ export async function installBb(bbVersion: string): Promise<string> {
     const bbDir = path.dirname(bbBinary);
     fs.mkdirSync(bbDir, { recursive: true });
     console.log(`Installing bb@${bbVersion} in ${bbDir}`);
-    await runCommand(`BB_HOME=${bbDir} ${bbupBinary} -v ${bbVersion}`);
+    await runCommand(`BB_PATH=${bbDir} ${bbupBinary} -v ${bbVersion}`);
   }
   return bbBinary;
 }

@@ -120,30 +120,31 @@ async function generateSolidityVerifier(
 
   const name = path.basename(file, ".json");
   console.log(`Generating Solidity ${flavor} verifier for ${name}...`);
-  let writeVkCmd: string, contractCmd: string;
-  switch (flavor) {
-    case "ultra_plonk": {
-      writeVkCmd = "write_vk";
-      contractCmd = "contract";
-      break;
-    }
-    case "ultra_keccak_honk": {
-      writeVkCmd = "write_vk_ultra_keccak_honk";
-      contractCmd = "contract_ultra_honk";
-      break;
-    }
-    default: {
-      flavor satisfies never;
-      return;
-    }
-  }
   const nameSuffix =
     flavor === ProofFlavor.ultra_keccak_honk ? "" : `_${flavor}`;
   await runCommand(
-    `${bbBinary} ${writeVkCmd} -b ${targetDir}/${name}.json -o ${targetDir}/${name}${nameSuffix}_vk`,
+    [
+      bbBinary,
+      "write_vk",
+      "--scheme",
+      flavor,
+      "-b",
+      `${targetDir}/${name}.json`,
+      "-o",
+      `${targetDir}/${name}${nameSuffix}_vk`,
+    ].join(" "),
   );
   await runCommand(
-    `${bbBinary} ${contractCmd} -k ${targetDir}/${name}${nameSuffix}_vk -o ${targetDir}/${name}${nameSuffix}.sol`,
+    [
+      bbBinary,
+      "write_solidity_verifier",
+      "--scheme",
+      flavor,
+      "-k",
+      `${targetDir}/${name}${nameSuffix}_vk`,
+      "-o",
+      `${targetDir}/${name}${nameSuffix}.sol`,
+    ].join(" "),
   );
   console.log(`Generated Solidity ${flavor} verifier for ${name}`);
 }
