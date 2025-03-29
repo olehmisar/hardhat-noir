@@ -8,9 +8,8 @@ import { task } from "hardhat/config";
 import { HardhatPluginError } from "hardhat/plugins";
 import { HardhatConfig } from "hardhat/types";
 import { NoirCache } from "./cache";
-import { installNargo } from "./install";
 import { getTarget, ProofFlavor } from "./Noir";
-import { makeRunCommand, PLUGIN_NAME } from "./utils";
+import { PLUGIN_NAME } from "./utils";
 
 task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
   async (args, { config }, runSuper) => {
@@ -103,8 +102,19 @@ task(TASK_CLEAN).setAction(async (_, { config }, runSuper) => {
 
 task("noir-new", "Create a new Noir package")
   .addPositionalParam("name", "The name of the package")
-  .addOptionalParam("lib", "If true, create a library package")
+  .addOptionalParam("lib", "If set, create a library package")
+  .addOptionalParam(
+    "noAdd",
+    "If set, do not add the package to the Nargo.toml workspace",
+  )
   .setAction(async (args, { config }) => {
+    const fs = await import("fs");
+    const path = await import("path");
+    const toml = await import("smol-toml");
+    const { generateNargoToml, generateMain, generateLib } = await import(
+      "./templates"
+    );
+
     if (args.name.includes("-")) {
       throw new HardhatPluginError(
         PLUGIN_NAME,
@@ -112,14 +122,30 @@ task("noir-new", "Create a new Noir package")
       );
     }
 
-    const fs = await import("fs");
+    const newPath = path.join(config.paths.noir, args.name);
+    const srcPath = path.join(newPath, "src");
+    fs.mkdirSync(srcPath, { recursive: true });
 
-    const nargoBinary = await installNargo(config.noir.version);
-    const runCommand = makeRunCommand(config.paths.noir);
-    fs.mkdirSync(config.paths.noir, { recursive: true });
-    await runCommand(
-      `${nargoBinary} new ${args.name} ${args.lib ? "--lib" : ""}`,
+    fs.writeFileSync(
+      path.join(newPath, "Nargo.toml"),
+      generateNargoToml(args.name),
     );
+    if (args.lib) {
+      fs.writeFileSync(path.join(srcPath, "lib.nr"), generateLib());
+    } else {
+      fs.writeFileSync(path.join(srcPath, "main.nr"), generateMain());
+    }
+
+    if (!args.noAdd) {
+      const rootNargoPath = path.join(config.paths.noir, "Nargo.toml");
+      const rootNargo = toml.parse(fs.readFileSync(rootNargoPath, "utf-8")) as {
+        workspace?: { members?: string[] };
+      };
+      rootNargo.workspace ??= {};
+      rootNargo.workspace.members ??= [];
+      rootNargo.workspace.members.push(args.name);
+      fs.writeFileSync(rootNargoPath, toml.stringify(rootNargo));
+    }
   });
 
 task(
