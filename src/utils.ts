@@ -1,7 +1,7 @@
 import { HardhatPluginError } from "hardhat/plugins";
 import type { SpawnOptions } from "node:child_process";
 
-export const PLUGIN_NAME = "hardhat-plugin-noir";
+export const PLUGIN_NAME = "hardhat-noir";
 
 export const makeRunCommand =
   (cwd?: string) =>
