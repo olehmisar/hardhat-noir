@@ -4,6 +4,8 @@
 
 Develop [Noir](https://noir-lang.org) with [Hardhat](https://hardhat.org) without hassle.
 
+[Use a boilerplate](https://github.com/olehmisar/hardhat-noir-starter) to get started.
+
 ## What
 
 Write programs in Noir, generate Solidity verifiers and run tests.
