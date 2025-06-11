@@ -109,16 +109,11 @@ async function generateSolidityVerifier(
 ) {
   const path = await import("path");
   const fs = await import("fs");
-  const { UltraHonkBackend, UltraPlonkBackend } = await import("@aztec/bb.js");
+  const { UltraHonkBackend } = await import("@aztec/bb.js");
 
   let verifier: string;
   const program = JSON.parse(fs.readFileSync(file, "utf-8"));
   switch (flavor) {
-    case "ultra_plonk": {
-      const backend = new UltraPlonkBackend(program.bytecode);
-      verifier = await backend.getSolidityVerifier();
-      break;
-    }
     case "ultra_keccak_honk": {
       const backend = new UltraHonkBackend(program.bytecode);
       const vk = await backend.getVerificationKey({ keccak: true });

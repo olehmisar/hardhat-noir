@@ -34,7 +34,7 @@ export class NoirExtension {
    * Call this only once per circuit as it creates a new backend each time.
    *
    * @param name name of the circuit
-   * @param backendClass Backend class. Depends on the `noir.flavor` type you have set in Hardhat config. Either {@link UltraHonkBackend} or {@link UltraPlonkBackend}
+   * @param backendClass Backend class. Currently, only {@link UltraHonkBackend}-like backends are supported.
    */
   async getCircuit<T = UltraHonkBackend>(
     name: string,
@@ -65,5 +65,4 @@ export async function getTarget(noirDir: string | HardhatConfig) {
 export type ProofFlavor = keyof typeof ProofFlavor;
 export const ProofFlavor = {
   ultra_keccak_honk: "ultra_keccak_honk",
-  ultra_plonk: "ultra_plonk",
 } as const;
