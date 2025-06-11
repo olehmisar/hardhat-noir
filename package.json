@@ -47,7 +47,7 @@
     "hardhat": "^2.0.0"
   },
   "dependencies": {
-    "@aztec/bb.js": ">=0.85.0",
+    "@aztec/bb.js": ">=0.87.8",
     "glob": "^11.0.0",
     "zod": "^3.23.8"
   }
