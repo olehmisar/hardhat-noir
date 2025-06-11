@@ -101,7 +101,7 @@ it("proves and verifies on-chain", async () => {
   const input = { x: 1, y: 2 };
   const { witness } = await noir.execute(input);
   const { proof, publicInputs } = await backend.generateProof(witness, {
-    keccak: true,
+    keccakZK: true,
   });
   // it matches because we marked y as `pub` in `main.nr`
   expect(BigInt(publicInputs[0])).to.eq(BigInt(input.y));
@@ -117,7 +117,7 @@ it("proves and verifies on-chain", async () => {
       proof,
       publicInputs: [String(input.y)],
     },
-    { keccak: true },
+    { keccakZK: true },
   );
   expect(resultJs).to.eq(true);
 });

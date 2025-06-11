@@ -116,7 +116,7 @@ async function generateSolidityVerifier(
   switch (flavor) {
     case "ultra_keccak_honk": {
       const backend = new UltraHonkBackend(program.bytecode);
-      const vk = await backend.getVerificationKey({ keccak: true });
+      const vk = await backend.getVerificationKey({ keccakZK: true });
       verifier = await backend.getSolidityVerifier(vk);
       break;
     }
