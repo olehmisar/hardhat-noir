@@ -3,7 +3,7 @@ import {
   TASK_COMPILE,
   TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
 } from "hardhat/builtin-tasks/task-names";
-import { task } from "hardhat/config";
+import { task, types } from "hardhat/config";
 import { HardhatPluginError } from "hardhat/plugins";
 import { HardhatConfig } from "hardhat/types";
 import { NoirCache } from "./cache";
@@ -62,16 +62,29 @@ task(TASK_CLEAN).setAction(async (_, { config }, runSuper) => {
 
 task("noir-new", "Create a new Noir package")
   .addPositionalParam("name", "The name of the package")
-  .addOptionalParam("lib", "If true, create a library package")
+  .addOptionalParam(
+    "lib",
+    "If set, create a library package",
+    false,
+    types.boolean,
+  )
+  .addOptionalParam(
+    "noAdd",
+    "If set, do not add the package to the Nargo.toml workspace",
+    false,
+    types.boolean,
+  )
   .setAction(async (args, { config }) => {
+    const fs = await import("fs");
+    const path = await import("path");
+    const toml = await import("smol-toml");
+
     if (args.name.includes("-")) {
       throw new HardhatPluginError(
         PLUGIN_NAME,
         "Package name cannot contain '-'",
       );
     }
-
-    const fs = await import("fs");
 
     const nargoBinary = await installNargo(config.noir.version);
     const runCommand = makeRunCommand(config.paths.noir);
@@ -81,6 +94,19 @@ task("noir-new", "Create a new Noir package")
       cmdArgs.push("--lib");
     }
     await runCommand(nargoBinary, cmdArgs);
+
+    if (!args.noAdd) {
+      const rootNargoPath = path.join(config.paths.noir, "Nargo.toml");
+      const rootNargo = toml.parse(fs.readFileSync(rootNargoPath, "utf-8")) as {
+        workspace?: { members?: string[] };
+      };
+      rootNargo.workspace ??= {};
+      rootNargo.workspace.members ??= [];
+      if (!rootNargo.workspace.members.includes(args.name)) {
+        rootNargo.workspace.members.push(args.name);
+      }
+      fs.writeFileSync(rootNargoPath, toml.stringify(rootNargo));
+    }
   });
 
 task(
