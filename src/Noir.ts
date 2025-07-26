@@ -61,8 +61,3 @@ export async function getTarget(noirDir: string | HardhatConfig) {
   const path = await import("path");
   return path.join(noirDir, "target");
 }
-
-export type ProofFlavor = keyof typeof ProofFlavor;
-export const ProofFlavor = {
-  ultra_keccak_honk: "ultra_keccak_honk",
-} as const;

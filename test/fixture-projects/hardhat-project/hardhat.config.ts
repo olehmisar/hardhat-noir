@@ -21,7 +21,6 @@ const config: HardhatUserConfig = {
   },
   noir: {
     version: TEST_NOIR_VERSION,
-    flavor: ["ultra_keccak_honk"],
   },
 };
 
