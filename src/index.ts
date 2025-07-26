@@ -1,11 +1,10 @@
 import { extendConfig, extendEnvironment } from "hardhat/config";
-import { HardhatPluginError, lazyObject } from "hardhat/plugins";
+import { lazyObject } from "hardhat/plugins";
 import { HardhatConfig, HardhatUserConfig } from "hardhat/types";
 import path from "path";
-import { NoirExtension, ProofFlavor } from "./Noir";
+import { NoirExtension } from "./Noir";
 import "./tasks";
 import "./type-extensions";
-import { PLUGIN_NAME } from "./utils";
 
 extendConfig(
   (config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {
@@ -42,14 +41,8 @@ extendConfig(
     function resolveNoirConfig(
       u: HardhatUserConfig["noir"],
     ): HardhatConfig["noir"] {
-      const flavor: ProofFlavor[] = u.flavor
-        ? Array.isArray(u.flavor)
-          ? u.flavor
-          : [u.flavor]
-        : [ProofFlavor.ultra_keccak_honk];
       return {
         version: u.version,
-        flavor,
         skipNargoWorkspaceCheck: u.skipNargoWorkspaceCheck ?? false,
       };
     }

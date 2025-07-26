@@ -8,7 +8,7 @@ import { HardhatPluginError } from "hardhat/plugins";
 import { HardhatConfig } from "hardhat/types";
 import { NoirCache } from "./cache";
 import { installNargo } from "./install";
-import { getTarget, ProofFlavor } from "./Noir";
+import { getTarget } from "./Noir";
 import { makeRunCommand, PLUGIN_NAME } from "./utils";
 
 task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
@@ -40,12 +40,7 @@ task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
           return;
         }
 
-        for (const flavor of Object.values(ProofFlavor) as ProofFlavor[]) {
-          if (!config.noir.flavor.includes(flavor)) {
-            continue;
-          }
-          await generateSolidityVerifier(file, targetDir, flavor);
-        }
+        await generateSolidityVerifier(file, targetDir);
         await cache.saveJsonFileHash(file);
       }),
     );
@@ -102,43 +97,26 @@ task(
   },
 );
 
-async function generateSolidityVerifier(
-  file: string,
-  targetDir: string,
-  flavor: ProofFlavor,
-) {
+async function generateSolidityVerifier(file: string, targetDir: string) {
   const path = await import("path");
   const fs = await import("fs");
   const { UltraHonkBackend } = await import("@aztec/bb.js");
 
-  let verifier: string;
   const program = JSON.parse(fs.readFileSync(file, "utf-8"));
-  switch (flavor) {
-    case "ultra_keccak_honk": {
-      const backend = new UltraHonkBackend(program.bytecode);
-      const vk = await backend.getVerificationKey({ keccak: true });
-      verifier = await backend.getSolidityVerifier(vk);
-      break;
-    }
-    default: {
-      flavor satisfies never;
-      throw new HardhatPluginError(
-        PLUGIN_NAME,
-        `Unsupported Noir proof flavor: ${flavor}`,
-      );
-    }
-  }
+
+  const backend = new UltraHonkBackend(program.bytecode);
+  const vk = await backend.getVerificationKey({ keccak: true });
+  let verifier = await backend.getSolidityVerifier(vk);
+
   if (typeof verifier !== "string") {
     // bug in bb types
     verifier = new TextDecoder().decode(verifier);
   }
 
   const name = path.basename(file, ".json");
-  console.log(`Generating Solidity ${flavor} verifier for ${name}...`);
-  const nameSuffix =
-    flavor === ProofFlavor.ultra_keccak_honk ? "" : `_${flavor}`;
-  fs.writeFileSync(path.join(targetDir, `${name}${nameSuffix}.sol`), verifier);
-  console.log(`Generated Solidity ${flavor} verifier for ${name}`);
+  console.log(`Generating Solidity verifier for ${name}...`);
+  fs.writeFileSync(path.join(targetDir, `${name}.sol`), verifier);
+  console.log(`Generated Solidity verifier for ${name}`);
 }
 
 async function checkNargoWorkspace(config: HardhatConfig) {
