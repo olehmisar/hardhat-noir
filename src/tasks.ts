@@ -105,7 +105,7 @@ async function generateSolidityVerifier(file: string, targetDir: string) {
   const program = JSON.parse(fs.readFileSync(file, "utf-8"));
 
   const backend = new UltraHonkBackend(program.bytecode);
-  const vk = await backend.getVerificationKey({ keccak: true });
+  const vk = await backend.getVerificationKey({ keccakZK: true });
   let verifier = await backend.getSolidityVerifier(vk);
 
   if (typeof verifier !== "string") {
