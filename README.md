@@ -17,7 +17,7 @@ This plugin automatically manages `nargo` and `bb` versions and compiles Noir on
 Install the plugin and Noir dependencies:
 
 ```bash
-npm install hardhat-noir @noir-lang/noir_js@1.0.0-beta.6 @aztec/bb.js@0.87.8
+npm install hardhat-noir @noir-lang/noir_js@1.0.0-beta.11 @aztec/bb.js@1.2.0
 ```
 
 Import the plugin in your `hardhat.config.ts`:
@@ -36,7 +36,7 @@ const config: HardhatUserConfig = {
     settings: { optimizer: { enabled: true, runs: 100000000 } },
   },
   noir: {
-    version: "1.0.0-beta.6",
+    version: "1.0.0-beta.11",
   },
 };
 ```
@@ -147,7 +147,7 @@ Configure Noir and Barretenberg (bb) versions in `hardhat.config.ts`:
 export default {
   noir: {
     // Noir version, optional, will use the latest known Noir version by default
-    version: "1.0.0-beta.6",
+    version: "1.0.0-beta.11",
   },
 };
 ```
