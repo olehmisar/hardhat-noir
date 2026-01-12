@@ -35,12 +35,19 @@ describe("Integration tests examples", function () {
       expect(circuit.bytecode.length).to.be.gt(0);
     });
 
-    it("creates a package", async function () {
+    it("creates a bin package", async function () {
       const name = "my_package";
-      await this.hre.run("noir-new", { name });
+      await this.hre.run("noir-new", { name, noAdd: true });
       const dir = path.join(this.hre.config.paths.noir, name);
-      const exists = fs.existsSync(dir);
-      expect(exists).to.be.eq(true);
+      expect(fs.existsSync(path.join(dir, "src", "main.nr"))).to.be.eq(true);
+      fs.rmSync(dir, { recursive: true });
+    });
+
+    it("creates a lib package", async function () {
+      const name = "my_package";
+      await this.hre.run("noir-new", { name, lib: true, noAdd: true });
+      const dir = path.join(this.hre.config.paths.noir, name);
+      expect(fs.existsSync(path.join(dir, "src", "lib.nr"))).to.be.eq(true);
       fs.rmSync(dir, { recursive: true });
     });
 
