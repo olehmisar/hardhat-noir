@@ -4,6 +4,7 @@ import { HardhatConfig, HardhatUserConfig } from "hardhat/types";
 import path from "path";
 import { NoirExtension } from "./Noir";
 import "./tasks";
+import "./benchmark";
 import "./type-extensions";
 
 extendConfig(

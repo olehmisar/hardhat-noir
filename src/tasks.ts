@@ -18,8 +18,6 @@ task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
 
     const runCommand = makeRunCommand(config.paths.noir);
 
-    const nargoBinary = await installNargo(config.noir.version);
-
     await checkNargoWorkspace(config);
     await addGitIgnore(noirDir);
 
@@ -27,7 +25,21 @@ task(TASK_COMPILE, "Compile and generate circuits and contracts").setAction(
     const cache = await NoirCache.fromConfig(config);
     if ((await cache.haveSourceFilesChanged()) || force) {
       console.log("Compiling Noir circuits...");
-      await runCommand(nargoBinary, ["compile"]);
+      
+      // Try native compilation first, fallback to WASM
+      const compiled = await compileWithFallback(
+        config,
+        runCommand,
+        targetDir,
+      );
+      
+      if (!compiled) {
+        throw new HardhatPluginError(
+          PLUGIN_NAME,
+          "Failed to compile Noir circuits with both native and WASM compilation",
+        );
+      }
+      
       await cache.saveSourceFilesHash();
       console.log("Compiled Noir circuits");
     }
@@ -54,7 +66,7 @@ task(TASK_CLEAN).setAction(async (_, { config }, runSuper) => {
 
   await runSuper();
 
-  const targetDir = await getTarget(config.paths.noir);
+  const targetDir = await getTarget(config);
   if (fs.existsSync(targetDir)) {
     fs.rmSync(targetDir, { recursive: true });
   }
@@ -96,6 +108,121 @@ task(
     return [...paths, ...noirPaths];
   },
 );
+
+/**
+ * Compile Noir circuits with fallback to WASM if native compilation fails
+ * @returns true if compilation succeeded, false otherwise
+ */
+async function compileWithFallback(
+  config: HardhatConfig,
+  runCommand: (cmd: string, args: string[]) => Promise<void>,
+  targetDir: string,
+): Promise<boolean> {
+  // Try native compilation first
+  try {
+    const nargoBinary = await installNargo(config.noir.version);
+    await runCommand(nargoBinary, ["compile"]);
+    console.log("✓ Native compilation successful");
+    return true;
+  } catch (nativeError) {
+    console.log("✗ Native compilation failed, trying WASM fallback...");
+    console.log(`  Error: ${nativeError instanceof Error ? nativeError.message : String(nativeError)}`);
+    
+    // Fallback to WASM compilation
+    try {
+      await compileWithWasm(config, targetDir);
+      console.log("✓ WASM compilation successful");
+      return true;
+    } catch (wasmError) {
+      console.log("✗ WASM compilation also failed");
+      console.log(`  Error: ${wasmError instanceof Error ? wasmError.message : String(wasmError)}`);
+      return false;
+    }
+  }
+}
+
+/**
+ * Compile Noir circuits using WASM compiler
+ * This serves as a fallback when native nargo is not available
+ */
+async function compileWithWasm(
+  config: HardhatConfig,
+  targetDir: string,
+): Promise<void> {
+  const fs = await import("fs");
+  const path = await import("path");
+  
+  // Ensure target directory exists
+  fs.mkdirSync(targetDir, { recursive: true });
+  
+  // Dynamically import noir_wasm
+  const { compile } = await import("@noir-lang/noir_wasm");
+  
+  const noirDir = config.paths.noir;
+  
+  // Check if it's a workspace or single crate
+  const isWorkspace = fs.existsSync(path.join(noirDir, "Nargo.toml")) && 
+    !fs.existsSync(path.join(noirDir, "src"));
+  
+  if (isWorkspace) {
+    // Compile all crates in workspace
+    const members = fs
+      .readdirSync(noirDir)
+      .filter((dir) => 
+        fs.existsSync(path.join(noirDir, dir, "Nargo.toml")) &&
+        fs.statSync(path.join(noirDir, dir)).isDirectory()
+      );
+    
+    for (const member of members) {
+      const cratePath = path.join(noirDir, member);
+      await compileCrate(cratePath, targetDir, compile);
+    }
+  } else {
+    // Single crate project
+    await compileCrate(noirDir, targetDir, compile);
+  }
+}
+
+/**
+ * Compile a single Noir crate using WASM
+ */
+async function compileCrate(
+  cratePath: string,
+  targetDir: string,
+  compile: (source: string, options?: { contract?: boolean }) => Promise<{ circuit: string }>,
+): Promise<void> {
+  const fs = await import("fs");
+  const path = await import("path");
+  
+  // Read Nargo.toml to get crate name
+  const nargoTomlPath = path.join(cratePath, "Nargo.toml");
+  if (!fs.existsSync(nargoTomlPath)) {
+    throw new Error(`Nargo.toml not found in ${cratePath}`);
+  }
+  
+  const nargoToml = fs.readFileSync(nargoTomlPath, "utf-8");
+  const nameMatch = nargoToml.match(/name\s*=\s*"([^"]+)"/);
+  const crateName = nameMatch ? nameMatch[1] : path.basename(cratePath);
+  
+  // Read main.nr file
+  const mainNrPath = path.join(cratePath, "src", "main.nr");
+  if (!fs.existsSync(mainNrPath)) {
+    throw new Error(`src/main.nr not found in ${cratePath}`);
+  }
+  
+  const source = fs.readFileSync(mainNrPath, "utf-8");
+  
+  console.log(`  Compiling ${crateName} with WASM...`);
+  
+  // Compile using WASM
+  const result = await compile(source, { contract: false });
+  
+  // Write compiled circuit to target
+  const outputPath = path.join(targetDir, `${crateName}.json`);
+  fs.writeFileSync(outputPath, result.circuit);
+  
+  console.log(`  ✓ Compiled ${crateName} -> ${outputPath}`);
+}
 
 async function generateSolidityVerifier(file: string, targetDir: string) {
   const path = await import("path");
